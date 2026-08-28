@@ -6,6 +6,10 @@
 <title>Planning USL - Planning, contrats &amp; verification des heures</title>
 <link rel="stylesheet" href="css/style.css" />
 <meta name="theme-color" content="#ff7b00" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/favicon.ico" sizes="any" />
+<link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
 </head>
 <body>
 
@@ -42,10 +46,14 @@
     <button class="tab-btn" data-tab="semaines-speciales">Semaines speciales</button>
     <button class="tab-btn" data-tab="contrats">Contrats</button>
     <button class="tab-btn" data-tab="verification">Verification des heures</button>
+    <button class="tab-btn" data-tab="recap">Recap heures</button>
     <button class="tab-btn" data-tab="tableau-bord">Tableau de bord</button>
     <button class="tab-btn" data-tab="export">Export</button>
     <button class="tab-btn" data-tab="parametres">Parametres</button>
+    <button class="tab-btn" data-tab="actualisation">Actualisation</button>
   </nav>
+
+  <datalist id="liste-employes"></datalist>
 
   <main>
 
@@ -55,7 +63,8 @@
         <h2>Semaine-type (a remplir une seule fois)</h2>
         <p class="hint">Cette grille est votre semaine de reference. Le Planning annuel la recopie automatiquement sur toute la saison. Ecrivez un nom de salarie par case (plusieurs noms possibles, separes par « / »). Laissez vide si personne.</p>
         <div id="alerte-reference" class="alert-item bas hidden"></div>
-        <div class="table-wrap">
+        <p class="hint">Astuce : tapez le debut d'un nom, la liste des salaries connus s'affiche automatiquement. Un nom qui ne correspond a aucun salarie sera refuse (pour eviter les fautes de frappe).</p>
+        <div class="table-wrap grille-figee">
           <table id="table-semaine-type">
             <thead><tr id="entete-semaine-type"></tr></thead>
             <tbody></tbody>
@@ -77,7 +86,7 @@
         <p class="hint" id="planning-source"></p>
         <div id="planning-heures" class="chips-heures"></div>
         <button id="btn-reset-exceptions" class="btn btn-stop-outline hidden">Reinitialiser cette semaine (revenir a la semaine-type)</button>
-        <div class="table-wrap">
+        <div class="table-wrap grille-figee">
           <table id="table-planning">
             <thead><tr id="entete-planning"></tr></thead>
             <tbody></tbody>
@@ -94,7 +103,7 @@
         <p class="hint">Ces semaines remplacent completement la semaine-type par une grille dediee (vide au depart).</p>
         <div class="table-wrap">
           <table id="table-semaines-speciales-liste">
-            <thead><tr><th>Description</th><th>Semaine (lundi)</th><th>Type</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Description</th><th>Semaine (lundi)</th><th>N&deg; semaine</th><th>Type</th><th>Actions</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -173,11 +182,40 @@
         </div>
         <div id="verif-alerte" class="alert-item bas hidden"></div>
         <div id="verif-totaux" class="chips-heures"></div>
+        <p class="hint">La colonne « Pointe » est modifiable a la main (ex : oubli de pointage) : elle remplace alors la valeur venant de RH_USL pour ce jour. La croix &#10005; efface la correction et revient a RH_USL.</p>
         <div class="table-wrap">
           <table id="table-verification">
-            <thead><tr><th>Date</th><th>Jour</th><th>Prevu</th><th>Pointe</th><th>Ecart</th></tr></thead>
+            <thead><tr><th>Date</th><th>Jour</th><th>Prevu</th><th>Pointe</th><th>Ecart</th><th></th></tr></thead>
             <tbody></tbody>
           </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET RECAP HEURES -->
+    <section id="tab-recap" class="tab-content">
+      <div class="card">
+        <h2>Recap des heures prevues d'un salarie</h2>
+        <p class="hint">Total des heures planifiees (semaine-type + exceptions + semaines speciales), regroupees par semaine, par mois et par annee.</p>
+        <div class="form-row">
+          <label>Salarie
+            <select id="recap-employee"></select>
+          </label>
+          <label>Du <input type="date" id="recap-from" /></label>
+          <label>Au <input type="date" id="recap-to" /></label>
+          <button id="btn-recap" class="btn btn-go">Calculer</button>
+        </div>
+        <h3>Par semaine</h3>
+        <div class="table-wrap">
+          <table id="table-recap-semaine"><thead><tr><th>N&deg; semaine</th><th>Semaine du</th><th>Total</th></tr></thead><tbody></tbody></table>
+        </div>
+        <h3>Par mois</h3>
+        <div class="table-wrap">
+          <table id="table-recap-mois"><thead><tr><th>Mois</th><th>Total</th></tr></thead><tbody></tbody></table>
+        </div>
+        <h3>Par annee</h3>
+        <div class="table-wrap">
+          <table id="table-recap-annee"><thead><tr><th>Annee</th><th>Total</th></tr></thead><tbody></tbody></table>
         </div>
       </div>
     </section>
@@ -186,6 +224,7 @@
     <section id="tab-tableau-bord" class="tab-content">
       <div class="card">
         <h2>Comptages automatiques</h2>
+        <div id="tb-resume" class="chips-heures"></div>
         <div class="form-row">
           <label>Du <input type="date" id="tb-from" /></label>
           <label>Au <input type="date" id="tb-to" /></label>
@@ -235,8 +274,28 @@
 
       <div class="card">
         <h2>Salaries et salles</h2>
-        <p class="hint">Recuperes automatiquement depuis RH_USL — pour les modifier, va dans RH_USL &gt; Parametres.</p>
+        <p class="hint">La liste vient de RH_USL (pour eviter toute liste desynchronisee). Vous pouvez ajouter ou modifier un salarie ci-dessous : la demande est transmise directement a RH_USL avec son mot de passe administrateur (jamais enregistre ici).</p>
         <div id="param-reference" class="hint">Chargement...</div>
+
+        <h3>Ajouter un salarie</h3>
+        <div class="form-row">
+          <label>Nom <input type="text" id="salarie-nom" placeholder="Ex: JULIEN" /></label>
+          <label>Couleur <input type="color" id="salarie-couleur" value="#ffa000" /></label>
+          <label>Heures / semaine (contrat) <input type="number" id="salarie-heures" min="0" max="60" step="0.5" value="35" /></label>
+        </div>
+
+        <h3>Ou modifier un salarie existant</h3>
+        <div class="form-row">
+          <label>Salarie a modifier
+            <select id="salarie-existant"><option value="">— Nouveau salarie —</option></select>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label>Mot de passe admin RH_USL <input type="password" id="salarie-rhusl-password" placeholder="Mot de passe de RH_USL" /></label>
+          <button id="btn-save-salarie" class="btn btn-go">Enregistrer sur RH_USL</button>
+        </div>
+        <p class="hint">Une saisie proche d'un nom existant (faute de frappe) sera signalee avant l'enregistrement.</p>
       </div>
 
       <div class="card">
@@ -245,6 +304,16 @@
           <label>Nouveau mot de passe <input type="password" id="new-admin-password" placeholder="Au moins 4 caracteres" /></label>
           <button id="btn-change-password" class="btn btn-go">Changer le mot de passe</button>
         </div>
+      </div>
+    </section>
+
+    <!-- ONGLET ACTUALISATION -->
+    <section id="tab-actualisation" class="tab-content">
+      <div class="card">
+        <h2>Actualiser les donnees venant de RH_USL</h2>
+        <p class="hint">Recharge immediatement la liste des salaries et des salles depuis RH_USL, sans avoir a recharger toute la page. A utiliser si un salarie vient d'etre ajoute, ou si le message « RH_USL est injoignable » apparait.</p>
+        <button id="btn-actualiser" class="btn btn-go">Actualiser maintenant</button>
+        <div id="actualisation-resultat" class="status-box" style="margin-top:16px;">Aucune actualisation manuelle effectuee depuis l'ouverture de l'application.</div>
       </div>
     </section>
 
