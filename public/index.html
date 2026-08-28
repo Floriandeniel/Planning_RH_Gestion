@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Planning USL - Planning, contrats &amp; verification des heures</title>
+<link rel="stylesheet" href="css/style.css" />
+<meta name="theme-color" content="#ff7b00" />
+</head>
+<body>
+
+<!-- ECRAN DE CONNEXION (toute l'application est protegee : donnees sensibles) -->
+<div id="ecran-connexion" class="ecran-connexion">
+  <div class="connexion-box">
+    <h1>Planning USL</h1>
+    <p class="hint">Planning, contrats et verification des heures — lie a RH_USL.<br />Cet espace contient des donnees sensibles (contrats, salaires) : connexion requise.</p>
+    <label>Mot de passe
+      <input type="password" id="login-password" placeholder="Mot de passe" />
+    </label>
+    <button id="btn-login" class="btn btn-go">Se connecter</button>
+    <p id="login-erreur" class="erreur-connexion hidden"></p>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+
+  <header class="app-header">
+    <div class="logo-zone">
+      <div>
+        <h1>Planning USL</h1>
+        <p class="subtitle">Planning &amp; contrats — lie a RH_USL</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <button id="btn-deconnexion" class="btn-admin">Deconnexion</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="semaine-type">Semaine-type</button>
+    <button class="tab-btn" data-tab="planning">Planning annuel</button>
+    <button class="tab-btn" data-tab="semaines-speciales">Semaines speciales</button>
+    <button class="tab-btn" data-tab="contrats">Contrats</button>
+    <button class="tab-btn" data-tab="verification">Verification des heures</button>
+    <button class="tab-btn" data-tab="tableau-bord">Tableau de bord</button>
+    <button class="tab-btn" data-tab="export">Export</button>
+    <button class="tab-btn" data-tab="parametres">Parametres</button>
+  </nav>
+
+  <main>
+
+    <!-- ONGLET SEMAINE-TYPE -->
+    <section id="tab-semaine-type" class="tab-content active">
+      <div class="card">
+        <h2>Semaine-type (a remplir une seule fois)</h2>
+        <p class="hint">Cette grille est votre semaine de reference. Le Planning annuel la recopie automatiquement sur toute la saison. Ecrivez un nom de salarie par case (plusieurs noms possibles, separes par « / »). Laissez vide si personne.</p>
+        <div id="alerte-reference" class="alert-item bas hidden"></div>
+        <div class="table-wrap">
+          <table id="table-semaine-type">
+            <thead><tr id="entete-semaine-type"></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <button id="btn-save-semaine-type" class="btn btn-go">Enregistrer la semaine-type</button>
+      </div>
+    </section>
+
+    <!-- ONGLET PLANNING ANNUEL -->
+    <section id="tab-planning" class="tab-content">
+      <div class="card">
+        <h2>Planning d'une semaine precise</h2>
+        <div class="form-row">
+          <label>Semaine du (lundi) <input type="date" id="planning-lundi" /></label>
+          <button id="btn-planning-precedente" class="btn btn-warn-outline">&laquo; Semaine precedente</button>
+          <button id="btn-planning-suivante" class="btn btn-warn-outline">Semaine suivante &raquo;</button>
+        </div>
+        <p class="hint" id="planning-source"></p>
+        <div id="planning-heures" class="chips-heures"></div>
+        <button id="btn-reset-exceptions" class="btn btn-stop-outline hidden">Reinitialiser cette semaine (revenir a la semaine-type)</button>
+        <div class="table-wrap">
+          <table id="table-planning">
+            <thead><tr id="entete-planning"></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="hint">Chaque case se sauvegarde automatiquement des que vous en sortez (touche Tab ou clic ailleurs).</p>
+      </div>
+    </section>
+
+    <!-- ONGLET SEMAINES SPECIALES -->
+    <section id="tab-semaines-speciales" class="tab-content">
+      <div class="card">
+        <h2>Semaines speciales (vacances / horaires reduits / stage)</h2>
+        <p class="hint">Ces semaines remplacent completement la semaine-type par une grille dediee (vide au depart).</p>
+        <div class="table-wrap">
+          <table id="table-semaines-speciales-liste">
+            <thead><tr><th>Description</th><th>Semaine (lundi)</th><th>Type</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="form-row">
+          <label>Description <input type="text" id="ss-description" placeholder="Ex: Vacances de Noel" /></label>
+          <label>Lundi de la semaine <input type="date" id="ss-lundi" /></label>
+          <label>Type
+            <select id="ss-type">
+              <option value="Vacances">Vacances</option>
+              <option value="Horaires reduits">Horaires reduits</option>
+              <option value="Stage">Stage</option>
+            </select>
+          </label>
+          <button id="btn-add-semaine-speciale" class="btn btn-go">Ajouter</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET CONTRATS -->
+    <section id="tab-contrats" class="tab-content">
+      <div class="card">
+        <h2>Contrats des salaries</h2>
+        <p class="hint">Donnees sensibles : visibles uniquement apres connexion.</p>
+        <div class="table-wrap">
+          <table id="table-contrats">
+            <thead><tr><th>Salarie</th><th>Type</th><th>Debut</th><th>Fin</th><th>Heures/sem.</th><th>Taux horaire</th><th>Poste</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Ajouter / modifier un contrat</h2>
+        <input type="hidden" id="contrat-id" />
+        <div class="form-row">
+          <label>Salarie
+            <select id="contrat-employee"></select>
+          </label>
+          <label>Type de contrat
+            <select id="contrat-type">
+              <option value="CDI">CDI</option>
+              <option value="CDD">CDD</option>
+              <option value="Apprentissage">Apprentissage</option>
+              <option value="Stage">Stage</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </label>
+          <label>Date de debut <input type="date" id="contrat-debut" /></label>
+          <label>Date de fin (si CDD) <input type="date" id="contrat-fin" /></label>
+        </div>
+        <div class="form-row">
+          <label>Heures / semaine (contrat) <input type="number" id="contrat-heures" min="0" max="60" step="0.5" /></label>
+          <label>Taux horaire brut (&euro;) <input type="number" id="contrat-taux" min="0" step="0.01" /></label>
+          <label>Poste / fonction <input type="text" id="contrat-poste" placeholder="Ex: Educateur sportif" /></label>
+        </div>
+        <div class="form-col">
+          <label>Commentaire <textarea id="contrat-commentaire" rows="2"></textarea></label>
+        </div>
+        <div class="form-row">
+          <button id="btn-save-contrat" class="btn btn-go">Enregistrer</button>
+          <button id="btn-annuler-contrat" class="btn btn-stop-outline hidden">Annuler la modification</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET VERIFICATION DES HEURES -->
+    <section id="tab-verification" class="tab-content">
+      <div class="card">
+        <h2>Heures prevues (planning) vs heures pointees (RH_USL)</h2>
+        <div class="form-row">
+          <label>Salarie
+            <select id="verif-employee"></select>
+          </label>
+          <label>Du <input type="date" id="verif-from" /></label>
+          <label>Au <input type="date" id="verif-to" /></label>
+          <button id="btn-verifier" class="btn btn-go">Comparer</button>
+        </div>
+        <div id="verif-alerte" class="alert-item bas hidden"></div>
+        <div id="verif-totaux" class="chips-heures"></div>
+        <div class="table-wrap">
+          <table id="table-verification">
+            <thead><tr><th>Date</th><th>Jour</th><th>Prevu</th><th>Pointe</th><th>Ecart</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET TABLEAU DE BORD -->
+    <section id="tab-tableau-bord" class="tab-content">
+      <div class="card">
+        <h2>Comptages automatiques</h2>
+        <div class="form-row">
+          <label>Du <input type="date" id="tb-from" /></label>
+          <label>Au <input type="date" id="tb-to" /></label>
+          <button id="btn-calculer-tb" class="btn btn-go">Calculer</button>
+        </div>
+        <h3>Total par salarie</h3>
+        <div class="table-wrap">
+          <table id="table-tb-salarie"><thead><tr><th>Salarie</th><th>Total heures</th><th>Moy. / semaine</th></tr></thead><tbody></tbody></table>
+        </div>
+        <h3>Par salle</h3>
+        <div class="table-wrap">
+          <table id="table-tb-salle"><thead><tr id="entete-tb-salle"></tr></thead><tbody></tbody></table>
+        </div>
+        <h3>Par creneau horaire</h3>
+        <div class="table-wrap">
+          <table id="table-tb-creneau"><thead><tr id="entete-tb-creneau"></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET EXPORT -->
+    <section id="tab-export" class="tab-content">
+      <div class="card">
+        <h2>Extraction du planning (a donner a un salarie)</h2>
+        <p class="hint">Genere un fichier Excel avec les dates, salles et horaires prevus pour le salarie choisi, sur la periode indiquee. A toi de l'imprimer ou de l'envoyer.</p>
+        <div class="form-row">
+          <label>Salarie
+            <select id="export-employee"></select>
+          </label>
+          <label>Du <input type="date" id="export-from" /></label>
+          <label>Au <input type="date" id="export-to" /></label>
+          <button id="btn-export" class="btn btn-export">Telecharger le planning (Excel)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONGLET PARAMETRES -->
+    <section id="tab-parametres" class="tab-content">
+      <div class="card">
+        <h2>Periode de la saison</h2>
+        <div class="form-row">
+          <label>Debut (lundi) <input type="date" id="param-debut" /></label>
+          <label>Fin <input type="date" id="param-fin" /></label>
+          <button id="btn-save-periode" class="btn btn-go">Enregistrer</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Salaries et salles</h2>
+        <p class="hint">Recuperes automatiquement depuis RH_USL — pour les modifier, va dans RH_USL &gt; Parametres.</p>
+        <div id="param-reference" class="hint">Chargement...</div>
+      </div>
+
+      <div class="card">
+        <h2>Mot de passe</h2>
+        <div class="form-row">
+          <label>Nouveau mot de passe <input type="password" id="new-admin-password" placeholder="Au moins 4 caracteres" /></label>
+          <button id="btn-change-password" class="btn btn-go">Changer le mot de passe</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
