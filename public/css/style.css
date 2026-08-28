@@ -219,8 +219,39 @@ tbody tr:hover { background: rgba(255, 123, 0, 0.10); }
 }
 .cell-input:focus { outline: none; border-color: var(--jaune); background: #1e1e1e; }
 .cell-input.rempli { border-color: var(--orange); background: rgba(255, 123, 0, 0.12); color: var(--jaune-clair); font-weight: 700; }
+.cell-input.invalide { border-color: var(--rouge-alerte); background: rgba(229, 57, 53, 0.18); color: #ffb3b0; }
 td.col-jour { font-weight: 800; color: var(--jaune); }
 td.col-salle { color: var(--gris-clair); font-weight: 600; }
+
+/* ---------- En-tete + colonnes figees (grilles semaine-type / planning) ---------- */
+.grille-figee {
+  max-height: 68vh;
+  overflow: auto;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+}
+.grille-figee table { border-collapse: separate; border-spacing: 0; }
+.grille-figee thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+.grille-figee td.col-jour, .grille-figee td.col-salle {
+  position: sticky;
+  z-index: 2;
+  background: var(--noir-panel);
+}
+.grille-figee td.col-jour { left: 0; width: 92px; min-width: 92px; }
+.grille-figee td.col-salle { left: 92px; width: 120px; min-width: 120px; }
+.grille-figee thead th:nth-child(1),
+.grille-figee thead th:nth-child(2) {
+  z-index: 4;
+  position: sticky;
+  top: 0;
+  background: var(--orange-fonce);
+}
+.grille-figee thead th:nth-child(1) { left: 0; width: 92px; min-width: 92px; }
+.grille-figee thead th:nth-child(2) { left: 92px; width: 120px; min-width: 120px; }
 
 /* ---------- Puces d'heures (recap rapide) ---------- */
 .chips-heures { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
@@ -253,6 +284,39 @@ td.col-salle { color: var(--gris-clair); font-weight: 600; }
 tr.ecart-ok td { color: var(--vert-ok); }
 tr.ecart-attention td.col-ecart { color: var(--orange-alerte); font-weight: 800; }
 tr.ecart-important td.col-ecart { color: var(--rouge-alerte); font-weight: 800; }
+
+.pointe-input {
+  width: 70px;
+  padding: 4px 6px;
+  font-size: 13px;
+  border: 1px solid #444;
+  border-radius: 5px;
+  background: var(--noir);
+  color: var(--blanc);
+}
+.pointe-input.manuel { border-color: var(--jaune); background: rgba(255, 214, 10, 0.12); color: var(--jaune-clair); font-weight: 700; }
+.btn-effacer-pointe {
+  background: transparent;
+  border: none;
+  color: var(--gris-clair);
+  cursor: pointer;
+  font-size: 15px;
+  padding: 2px 6px;
+}
+.btn-effacer-pointe:hover { color: var(--rouge-alerte); }
+
+/* ---------- Status box (onglet Actualisation) ---------- */
+.status-box {
+  background: rgba(255, 214, 10, 0.08);
+  border: 2px dashed var(--jaune);
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--jaune-clair);
+}
+.status-box.erreur { border-color: var(--rouge-alerte); background: rgba(229, 57, 53, 0.12); color: #ffb3b0; }
+.status-box.succes { border-color: var(--vert-ok); background: rgba(67, 160, 71, 0.12); color: #a5e5a8; }
 
 /* ---------- Toast ---------- */
 .toast {
