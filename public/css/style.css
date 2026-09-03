@@ -318,6 +318,21 @@ tr.ecart-important td.col-ecart { color: var(--rouge-alerte); font-weight: 800; 
 .status-box.erreur { border-color: var(--rouge-alerte); background: rgba(229, 57, 53, 0.12); color: #ffb3b0; }
 .status-box.succes { border-color: var(--vert-ok); background: rgba(67, 160, 71, 0.12); color: #a5e5a8; }
 
+/* ---------- Boite de conflits (Planning annuel) ---------- */
+.conflits-box {
+  border: 2px dashed var(--rouge-alerte);
+  background: rgba(229, 57, 53, 0.10);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 10px 0;
+  font-size: 14px;
+  color: #ffcfcd;
+}
+.conflits-box h4 { margin: 0 0 6px; font-size: 14px; color: #ffb3b0; }
+.conflits-box ul { margin: 0 0 10px 18px; padding: 0; }
+.conflits-box ul:last-child { margin-bottom: 0; }
+.conflits-box li { margin-bottom: 3px; }
+
 /* ---------- Toast ---------- */
 .toast {
   position: fixed;
