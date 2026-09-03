@@ -85,7 +85,13 @@
         </div>
         <p class="hint" id="planning-source"></p>
         <div id="planning-heures" class="chips-heures"></div>
+        <div id="planning-conflits" class="conflits-box hidden"></div>
         <button id="btn-reset-exceptions" class="btn btn-stop-outline hidden">Reinitialiser cette semaine (revenir a la semaine-type)</button>
+        <div class="form-row">
+          <label>Dupliquer cette semaine vers le (lundi) <input type="date" id="planning-lundi-cible" /></label>
+          <button id="btn-dupliquer-semaine" class="btn btn-go">Dupliquer ici</button>
+          <button id="btn-dupliquer-semaine-suivante" class="btn btn-warn-outline">Dupliquer vers la semaine suivante &raquo;</button>
+        </div>
         <div class="table-wrap grille-figee">
           <table id="table-planning">
             <thead><tr id="entete-planning"></tr></thead>
